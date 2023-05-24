@@ -3,11 +3,11 @@ package com.gr1.spring.controller;
 import com.gr1.spring.controller.base.BaseController;
 import com.gr1.spring.dto.UserDTO;
 import com.gr1.spring.entity.Todo;
-import com.gr1.spring.entity.User;
 import com.gr1.spring.mapper.dto.TodoDTOMapper;
 import com.gr1.spring.mapper.request.TodoRequestMapper;
+import com.gr1.spring.payload.TodoFilterRequest;
 import com.gr1.spring.payload.TodoRequest;
-import com.gr1.spring.repository.UserRepository;
+import com.gr1.spring.payload.TodoStatusRequest;
 import com.gr1.spring.security.service.UserService;
 import com.gr1.spring.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -31,9 +32,7 @@ public class TodoController implements BaseController<TodoRequest> {
     private TodoRequestMapper requestMapper;
     @Autowired
     UserService userService;
-    @Autowired
-    UserRepository userRepository;
-    //ok
+
     @Override
     @GetMapping("")
     public ResponseEntity<?> all() {
@@ -60,11 +59,10 @@ public class TodoController implements BaseController<TodoRequest> {
     }
 
 
-    // fix request mapper
+    // fix request mapper TodoRequestMapper
     @Override
     @PostMapping("")
-    public ResponseEntity<?> create(TodoRequest entity) {
-        System.out.println(entity);
+    public ResponseEntity<?> create(@Valid @RequestBody TodoRequest entity) {
         return ResponseEntity
                 .ok()
                 .body(dtoMapper.toTodoDTO(todoService.save(requestMapper.toTodo(entity))));
@@ -74,25 +72,10 @@ public class TodoController implements BaseController<TodoRequest> {
     // add more dto mapper to convert id
     @Override
     @PutMapping("/{id}")
-
-    public ResponseEntity<?> update(TodoRequest entity, Long id) {
-        UserDTO user = userService.getUserDetail();
-        Long userId = user.getId();
-        Optional<Todo> todo = todoService.findByUserIdAndId(userId,id);
-        if(!todo.isPresent()){
-            String errorMessage = "Todo not found with ID: " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-        }
-        Optional<User> userData = userRepository.findById(userId);
-        // filter to  check user exist
-        if(userData.isPresent()) {
-            Todo todoMap = requestMapper.toTodo(entity);
-            todoMap.setUser(userData.get());
+    public ResponseEntity<?> update(@Valid @RequestBody TodoRequest entity, Long id) {
             return ResponseEntity
                     .ok()
-                    .body(dtoMapper.toTodoDTO(todoService.updateById(id,todoMap)));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not exist");
+                    .body(dtoMapper.toTodoDTO(todoService.updateById(id,requestMapper.toTodo(entity))));
     }
 
 
@@ -103,6 +86,21 @@ public class TodoController implements BaseController<TodoRequest> {
     public ResponseEntity<?> delete(Long id) {
        todoService.deleteById(id);
        return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/filter")
+    public ResponseEntity<?> filterByStatusAndTitle(@RequestParam("title") Optional<String> title,@RequestParam("status") Optional<String> status) {
+        // Process the queryParam and return the response
+
+        TodoFilterRequest filterRequest = new TodoFilterRequest(title,status);
+        return ResponseEntity.ok().body(todoService.filterByStatusAndTitle(filterRequest));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@RequestBody() TodoStatusRequest request, @PathVariable("id") String todoId){
+        System.out.println(todoId+request.getIs_done());
+        return ResponseEntity.ok().body(todoService.updateStatus(request,todoId));
     }
 
 }

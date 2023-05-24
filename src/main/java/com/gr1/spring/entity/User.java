@@ -18,14 +18,11 @@ import lombok.Setter;
 @Table(name="users")
 public class User extends BaseEntity {
 
-    @Getter
-    @Setter
+
     @Column(name = "name",nullable = false,length = 30)
-    @Size(max=30, message = "Username from 1-30 characters")
     private String name;
 
-    @Getter
-    @Setter
+
     @Column(name = "password")
     private String password;
 

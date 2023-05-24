@@ -21,7 +21,7 @@ public class Todo extends BaseEntity {
     @Column(name = "title",nullable = false,length = 30)
     private String title;
 
-    @Column(name = "desc",nullable = false,length = 200)
+    @Column(name = "\"desc\"", nullable = false, length = 200)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

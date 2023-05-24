@@ -1,6 +1,8 @@
 package com.gr1.spring.security.service;
 
 import com.gr1.spring.dto.UserDTO;
+import com.gr1.spring.entity.RefreshToken;
+import com.gr1.spring.exception.CustomValidationException;
 import com.gr1.spring.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,15 +21,18 @@ public class UserService {
    private AuthenticationManager authenticationManager;
    @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
-   public UserDTO login(String username, String password){
+    public UserDTO login(String username, String password){
        Authentication authentication = authenticationManager.authenticate(
                new UsernamePasswordAuthenticationToken(username, password));
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtUtils.generateJwtToken(authentication);
 
        UserDetailsImpl userDetails  = (UserDetailsImpl) authentication.getPrincipal();
-       return new UserDTO(jwt,userDetails.getId(),userDetails.getUsername());
+       RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+       return new UserDTO(jwt,refreshToken.getToken(),userDetails.getId(),userDetails.getUsername());
    }
     @Autowired
     private HttpServletRequest request;
@@ -52,15 +57,14 @@ public class UserService {
                         userDetailsImpl.getUsername()
                        );
             }
+            throw new CustomValidationException("No token provided");
         } catch (Exception e) {
             throw e;
         }
-        return null;
     }
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-
             return headerAuth.substring(7, headerAuth.length());
         }
         return null;

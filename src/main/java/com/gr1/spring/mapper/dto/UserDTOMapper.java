@@ -1,6 +1,8 @@
 package com.gr1.spring.mapper.dto;
 import com.gr1.spring.dto.UserDTO;
 import com.gr1.spring.entity.Todo;
+import com.gr1.spring.entity.User;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,11 +14,11 @@ import java.util.stream.Collectors;
 public class UserDTOMapper {
     @Autowired
     private ModelMapper mapper;
-    public UserDTO toUserDTO(Todo todo){
-        return mapper.map(todo,UserDTO.class);
+    public UserDTO toUserDTO(User user){
+        return mapper.map(user,UserDTO.class);
     }
-    public List<UserDTO> toCategoryDTOs(List<Todo> todos) {
-        return todos.stream()
+    public List<UserDTO> toUserDTOs(List<User> users) {
+        return users.stream()
                 .map(this::toUserDTO)
                 .collect(Collectors.toList());
     }
