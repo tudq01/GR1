@@ -4,7 +4,7 @@ import com.gr1.spring.dto.UserDTO;
 import com.gr1.spring.entity.Todo;
 import com.gr1.spring.entity.User;
 import com.gr1.spring.exception.CustomValidationException;
-import com.gr1.spring.payload.TodoRequest;
+import com.gr1.spring.payload.request.todo.TodoRequest;
 import com.gr1.spring.repository.UserRepository;
 
 import com.gr1.spring.security.service.UserService;

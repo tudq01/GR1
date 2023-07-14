@@ -1,4 +1,4 @@
-package com.gr1.spring.payload;import lombok.AllArgsConstructor;
+package com.gr1.spring.payload.request.todo;import lombok.AllArgsConstructor;
         import lombok.Data;
         import lombok.NoArgsConstructor;
 

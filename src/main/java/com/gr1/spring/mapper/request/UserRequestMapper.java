@@ -1,7 +1,7 @@
 package com.gr1.spring.mapper.request;
 
 import com.gr1.spring.entity.User;
-import com.gr1.spring.payload.LoginRequest;
+import com.gr1.spring.payload.request.auth.LoginRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

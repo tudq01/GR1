@@ -1,4 +1,4 @@
-package com.gr1.spring.payload;
+package com.gr1.spring.payload.request.auth;
 
 import javax.validation.constraints.NotBlank;
 

@@ -11,6 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public interface TodoRepository extends BaseRepository<Todo,Long> {
     Optional<Todo> findByUserIdAndId(Long userId,Long id);
@@ -29,4 +32,8 @@ public interface TodoRepository extends BaseRepository<Todo,Long> {
     @Modifying
     @Query(value="UPDATE Todo t SET t.is_done = :is_done WHERE t.id = :id")
     Integer updateByUser_IdAndStatus(@Param("id") Long todoId    ,@Param("is_done")Boolean status);
+
+    Page<Todo> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    List<Todo> findByTitleContaining(String title, Sort sort);
 }

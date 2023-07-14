@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,18 +20,19 @@ public class UserDTO extends BaseDTO {
     private Long id;
     private String username;
     private String refreshToken;
-
+    private List<String> roles;
     public UserDTO(String accessToken, Long id, String username) {
         this.accessToken = accessToken;
         this.id = id;
         this.username = username;
     }
 
-    public UserDTO(String accessToken, String refreshToken, Long id, String username) {
+    public UserDTO(String accessToken, String refreshToken, Long id, String username,List<String> roles) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.id = id;
         this.username = username;
+        this.roles = roles;
 
     }
 }

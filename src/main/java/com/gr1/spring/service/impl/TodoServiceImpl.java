@@ -5,9 +5,8 @@ import com.gr1.spring.dto.UserDTO;
 import com.gr1.spring.entity.Todo;
 import com.gr1.spring.exception.CustomValidationException;
 import com.gr1.spring.mapper.dto.TodoDTOMapper;
-import com.gr1.spring.payload.TodoFilterRequest;
-import com.gr1.spring.payload.TodoRequest;
-import com.gr1.spring.payload.TodoStatusRequest;
+import com.gr1.spring.payload.request.todo.TodoFilterRequest;
+import com.gr1.spring.payload.request.todo.TodoStatusRequest;
 import com.gr1.spring.repository.TodoRepository;
 
 import com.gr1.spring.security.service.UserService;
@@ -15,14 +14,15 @@ import com.gr1.spring.service.TodoService;
 import com.gr1.spring.service.base.impl.BaseServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TodoServiceImpl  extends BaseServiceImpl<Todo> implements TodoService{
@@ -87,5 +87,52 @@ public class TodoServiceImpl  extends BaseServiceImpl<Todo> implements TodoServi
             throw new CustomValidationException("No todo found");
         }
         return todoRepository.updateByUser_IdAndStatus(id,status.getIs_done());
+    }
+    private Sort.Direction getSortDirection(String direction) {
+        if (direction.equals("asc")) {
+            return Sort.Direction.ASC;
+        } else if (direction.equals("desc")) {
+            return Sort.Direction.DESC;
+        }
+
+        return Sort.Direction.ASC;
+    }
+    public Map<String, Object> getAllTodo(Long userId, String title, int page, int size, String[] sort){
+        try {
+            List<Sort.Order> orders = new ArrayList<Sort.Order>();
+ 
+            if (sort[0].contains(",")) {
+                // will sort more than 2 fields
+                // sortOrder="field, direction"
+                for (String sortOrder : sort) {
+                    String[] _sort = sortOrder.split(",");
+                    orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
+                }
+            } else {
+                // sort=[field, direction]
+                orders.add(new Order(getSortDirection(sort[1]), sort[0]));
+            }
+
+            List<Todo> tutorials = new ArrayList<Todo>();
+            Pageable pagingSort = PageRequest.of(page, size, Sort.by(orders));
+
+            Page<Todo> pageTuts;
+            if (title == null)
+                pageTuts = todoRepository.findAll(pagingSort);
+            else
+                pageTuts = todoRepository.findByTitleContainingIgnoreCase(title, pagingSort);
+
+            tutorials = pageTuts.getContent();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tutorials", tutorials);
+            response.put("currentPage", pageTuts.getNumber());
+            response.put("totalItems", pageTuts.getTotalElements());
+            response.put("totalPages", pageTuts.getTotalPages());
+
+            return response;
+        } catch (Exception e) {
+            throw new CustomValidationException("Something went wrong");
+        }
     }
 }
